@@ -2,12 +2,12 @@
 
 if [[ $EUID -eq 0 ]]
 then
-    echo "This script assumes you have installed ghpb in /opt/ghpb-bin and that you run it as a service (see https://github.com/Nicemanss/hpb-tools/blob/master/hpb-install )"
+    echo "This script assumes you have installed ghpb in /media/hpbserver/hm/ghpb-bin and that you run it as a service (see https://github.com/Nicemanss/hpb-tools/blob/master/hpb-install )"
     echo "To install a specific version, add the version at the end. Example: bash ./hpb-upgrade 1.0.2.3"
     read -r -p "Are you sure you want to continue? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
     then
-        if [ -d /opt/ghpb-bin ] && [ -f /etc/systemd/system/ghpb@.service ]
+        if [ -d /media/hpbserver/hm/ghpb-bin ] && [ -f /etc/systemd/system/ghpb@.service ]
         then
             # Check the latest hpb-go release
             #LATESTVERSION=`curl -s https://api.github.com/repos/hpb-project/go-hpb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")'`
@@ -45,30 +45,30 @@ then
             make all
 
             echo "Copying binaries"
-            cp build/bin/* /opt/ghpb-bin
+            cp build/bin/* /media/hpbserver/hm/ghpb-bin
 
             echo "Backing up keystore data"
-            mv /opt/ghpb-bin/node/data/keystore /opt/ghpb-bin/
+            mv /media/hpbserver/hm/ghpb-bin/node/data/keystore /media/hpbserver/hm/ghpb-bin/
 
             echo "Clearing node data"
-            rm -rf /opt/ghpb-bin/node
+            rm -rf /media/hpbserver/hm/ghpb-bin/node
 
             echo "Initializing genesis block"
-            cd /opt/ghpb-bin/
-            wget -q https://raw.githubusercontent.com/hpb-project/hpb-release/master/config/gensis.json -O /opt/ghpb-bin/gensis.json
+            cd /media/hpbserver/hm/ghpb-bin/
+            wget -q https://raw.githubusercontent.com/hpb-project/hpb-release/master/config/gensis.json -O /media/hpbserver/hm/ghpb-bin/gensis.json
             ./ghpb --datadir node/data init gensis.json
 
             echo "Restoring keystore data"
-            mv /opt/ghpb-bin/keystore /opt/ghpb-bin/node/data/
+            mv /media/hpbserver/hm/ghpb-bin/keystore /media/hpbserver/hm/ghpb-bin/node/data/
 
             echo "Starting ghpb service"
             systemctl start ghpb@root.service
-            echo "Node started. Run /opt/ghpb-bin/ghpb attach http://127.0.0.1:8545 to attach to console"
+            echo "Node started. Run /media/hpbserver/hm/ghpb-bin/ghpb attach http://127.0.0.1:8545 to attach to console"
 
             echo "Cleaning temp directories"
             rm -rf /root/hpb-temp
         else
-            echo "/opt/ghpb-bin or /etc/systemd/system/ghpb@.service does not exist, exiting."
+            echo "/media/hpbserver/hm/ghpb-bin or /etc/systemd/system/ghpb@.service does not exist, exiting."
         fi
 
     else

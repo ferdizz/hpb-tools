@@ -2,7 +2,7 @@
 
 if [[ $EUID -eq 0 ]]
 then
-    read -r -p "This script will install hpb in /opt/hpb-bin, and delete any existing installation. Make sure UDP/TCP 30303 and 30403 are forwarded to the server. Are you sure you want to continue? [y/N] " response
+    read -r -p "This script will install hpb in /media/hpbserver/hm/hpb-bin, and delete any existing installation. Make sure UDP/TCP 30303 and 30403 are forwarded to the server. Are you sure you want to continue? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
     then
         # LATESTVERSION=`curl -s https://api.github.com/repos/hpb-project/go-hpb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")'`
@@ -61,9 +61,9 @@ then
                 rm -rf /root/hpb-temp
             fi
 
-            if [ -d /opt/ghpb-bin ]
+            if [ -d /media/hpbserver/hm/ghpb-bin ]
             then
-                rm -rf /opt/ghpb-bin
+                rm -rf /media/hpbserver/hm/ghpb-bin
             fi      
 
             if [ -f /etc/systemd/system/ghpb@.service ]
@@ -79,7 +79,7 @@ then
 
             echo "Creating directories"
             mkdir /root/hpb-temp
-            mkdir /opt/ghpb-bin
+            mkdir /media/hpbserver/hm/ghpb-bin
 
             echo "Entering /root/hpb-temp/"
             cd /root/hpb-temp
@@ -129,19 +129,19 @@ then
 
             echo "Building release"
             make all
-            cp build/bin/* /opt/ghpb-bin
+            cp build/bin/* /media/hpbserver/hm/ghpb-bin
 
             echo "Init the genesis block"
-            cd /opt/ghpb-bin
+            cd /media/hpbserver/hm/ghpb-bin
             wget https://raw.githubusercontent.com/hpb-project/hpb-release/master/config/gensis.json
             ./ghpb --datadir node/data init gensis.json
 
             echo "Setting up keystore"
-            mkdir /opt/ghpb-bin/node/data/keystore
-            echo $KEYSTORE > /opt/ghpb-bin/node/data/keystore/keystore
+            mkdir /media/hpbserver/hm/ghpb-bin/node/data/keystore
+            echo $KEYSTORE > /media/hpbserver/hm/ghpb-bin/node/data/keystore/keystore
 
             echo "Setting up wallet password"
-            echo $WALLETPASSWORD > /opt/ghpb-bin/pwd
+            echo $WALLETPASSWORD > /media/hpbserver/hm/ghpb-bin/pwd
 
             echo "Creating ghpb service file"
 cat <<EOF > /etc/systemd/system/ghpb@.service
@@ -152,7 +152,7 @@ Requires=network.target
 [Service]
 Type=simple
 User=%I
-ExecStart=/opt/ghpb-bin/ghpb --datadir /opt/ghpb-bin/node/data --unlock $WALLET --password /opt/ghpb-bin/pwd --nat extip:$NODEIP --networkid 100 --verbosity 3 --rpc --rpcapi hpb,web3,admin,txpool,debug,personal,net,miner,prometheus
+ExecStart=/media/hpbserver/hm/ghpb-bin/ghpb --datadir /media/hpbserver/hm/ghpb-bin/node/data --unlock $WALLET --password /media/hpbserver/hm/ghpb-bin/pwd --nat extip:$NODEIP --networkid 100 --verbosity 3 --rpc --rpcapi hpb,web3,admin,txpool,debug,personal,net,miner,prometheus
 Restart=on-failure
 
 [Install]
@@ -167,7 +167,7 @@ EOF
             if [ "$KERNELVERSION" != "4.18.10-041810-generic" ]
             then
                 # Show information message to user
-                echo "After reboot in 10 seconds, you can access the console by typing: /opt/ghpb-bin/ghpb attach http://127.0.0.1:8545 \n
+                echo "After reboot in 10 seconds, you can access the console by typing: /media/hpbserver/hm/ghpb-bin/ghpb attach http://127.0.0.1:8545 \n
                 In the console:\n
                 Check your peers by typing: net \n
                 Verify you are mining by typing: hpb.mining \n
@@ -180,7 +180,7 @@ EOF
                 echo "Starting GHPB"
                 systemctl start ghpb@root.service
                 sleep 3
-                echo "Type the following to attach to the ghpb console: /opt/ghpb-bin/ghpb attach http://127.0.0.1:8545"
+                echo "Type the following to attach to the ghpb console: /media/hpbserver/hm/ghpb-bin/ghpb attach http://127.0.0.1:8545"
             fi
         else
             echo "You must run Ubuntu 16.04 "
